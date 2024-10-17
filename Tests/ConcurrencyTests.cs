@@ -26,6 +26,17 @@ namespace ConcurrencyDemo.Tests
             using var context = new AppDbContext(_options);
             context.Database.EnsureCreated();  // Ensure that the schema is created
 
+            context.Database.ExecuteSqlRaw(@"
+    CREATE TRIGGER SetProductVersionOnUpdate
+    AFTER UPDATE ON Products
+    BEGIN
+        UPDATE Products
+        SET Version = Version + 1
+        WHERE rowid = NEW.rowid;
+    END;
+");
+
+
             // Seed initial data if necessary
             if (!context.Products.Any())
             {
