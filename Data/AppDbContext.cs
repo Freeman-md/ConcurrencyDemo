@@ -11,5 +11,15 @@ namespace ConcurrencyDemo.Data
             : base(options)
         {
         }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Product>()
+                .Property(p => p.Version)
+                .IsConcurrencyToken()
+                .HasDefaultValue(0)
+                .ValueGeneratedOnAddOrUpdate();
+        }
+
     }
 }
