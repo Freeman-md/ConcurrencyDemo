@@ -65,5 +65,28 @@ namespace ConcurrencyDemo.Tests
             // The final StockQuantity will be 30, overwriting the first user's changes
             Assert.Equal(30, finalProduct.StockQuantity);
         }
+
+        [Fact]
+        public void ConcurrencyIssue_ShouldThrowException()
+        {
+            // First context simulating first user
+            using var context1 = new AppDbContext(_options);
+            var product1 = context1.Products.First(p => p.Id == 1);
+
+            // Second context simulating second user
+            using var context2 = new AppDbContext(_options);
+            var product2 = context2.Products.First(p => p.Id == 1);
+
+            // First user updates the product
+            product1.StockQuantity = 20;
+            context1.SaveChanges();
+
+            // Second user attempts to update and save
+            product2.StockQuantity = 30;
+
+            // Expect a concurrency exception (this will fail)
+            Assert.Throws<DbUpdateConcurrencyException>(() => context2.SaveChanges());
+        }
+
     }
 }
